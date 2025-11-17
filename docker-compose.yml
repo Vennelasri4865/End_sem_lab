@@ -1,0 +1,38 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: hospital-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: hospital_db
+      MYSQL_USER: hospital_user
+      MYSQL_PASSWORD: hospital_pass
+    ports:
+      - "3320:3306"   # changed to 3320
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - hms-net
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: hospital-backend
+    depends_on:
+      - db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/hospital_db
+      SPRING_DATASOURCE_USERNAME: hospital_user
+      SPRING_DATASOURCE_PASSWORD: hospital_pass
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    ports:
+      - "8085:8080"
+    networks:
+      - hms-net
+
+networks:
+  hms-net:
+
+volumes:
+  db_data:
